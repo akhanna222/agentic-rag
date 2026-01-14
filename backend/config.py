@@ -34,3 +34,11 @@ SUPPORTED_EXTENSIONS = {".pdf", ".json", ".png", ".jpg", ".jpeg", ".gif", ".md",
 # Server Configuration
 HOST = "0.0.0.0"
 PORT = 8000
+
+# API Authentication (for n8n and external integrations)
+API_KEY = os.getenv("RAG_API_KEY", "")  # Set this for API authentication
+API_KEY_HEADER = "X-API-Key"
+REQUIRE_API_KEY = os.getenv("REQUIRE_API_KEY", "false").lower() == "true"
+
+# Webhook Configuration (for async callbacks)
+WEBHOOK_TIMEOUT = 30  # seconds

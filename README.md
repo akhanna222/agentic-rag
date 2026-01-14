@@ -99,6 +99,101 @@ agentic-rag/
    docker-compose up -d
    ```
 
+## n8n Integration
+
+This API is designed for easy integration with n8n workflow automation.
+
+### Quick Setup
+
+1. **Enable API Authentication** (recommended):
+   ```bash
+   # In .env file
+   REQUIRE_API_KEY=true
+   RAG_API_KEY=your-secure-key-here
+   ```
+
+2. **n8n Credentials**: Create a "Header Auth" credential with:
+   - Name: `X-API-Key`
+   - Value: `your-secure-key-here`
+
+### n8n Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/ask` | GET/POST | Simple query (recommended for n8n) |
+| `/api/v1/ask/async` | POST | Async query with webhook callback |
+| `/api/v1/diseases` | GET | List diseases (for dropdowns) |
+| `/api/v1/diseases?name=X` | POST | Create disease |
+
+### Example: Simple Query (GET)
+
+**HTTP Request Node Configuration:**
+- Method: `GET`
+- URL: `http://your-server:8000/api/v1/ask`
+- Authentication: Header Auth
+- Query Parameters:
+  - `disease`: `diabetes`
+  - `question`: `What are the symptoms?`
+  - `verify`: `true`
+
+**Response:**
+```json
+{
+  "success": true,
+  "answer": "Based on the documents...",
+  "verified": true,
+  "confidence": 0.92,
+  "sources": [{"file": "guide.pdf", "excerpt": "..."}]
+}
+```
+
+### Example: Simple Query (POST)
+
+**HTTP Request Node Configuration:**
+- Method: `POST`
+- URL: `http://your-server:8000/api/v1/ask`
+- Body Content Type: `JSON`
+- Body:
+```json
+{
+  "disease": "diabetes",
+  "question": "What are the treatment options?",
+  "verify": true
+}
+```
+
+### Example: Async Query with Webhook
+
+For long-running queries, use async mode with a webhook callback:
+
+1. Add a **Webhook** node to receive the callback
+2. Add an **HTTP Request** node:
+   - Method: `POST`
+   - URL: `http://your-server:8000/api/v1/ask/async`
+   - Body:
+   ```json
+   {
+     "disease": "diabetes",
+     "query": "Complex question here...",
+     "use_verification": true,
+     "webhook_url": "{{ $node.Webhook.webhookUrl }}"
+   }
+   ```
+
+### Example: Upload Document from URL
+
+Fetch and process a document from a URL:
+- Method: `POST`
+- URL: `http://your-server:8000/upload/diabetes/url`
+- Query Parameters:
+  - `url`: `https://example.com/document.pdf`
+
+### Example n8n Workflow
+
+```
+[Trigger] → [HTTP Request: List Diseases] → [Set Disease] → [HTTP Request: Ask Question] → [Response]
+```
+
 ## API Reference
 
 ### Diseases
@@ -174,6 +269,8 @@ This multi-step verification ensures:
 | `TOP_K_RETRIEVAL` | 5 | Number of chunks to retrieve |
 | `MAX_VERIFICATION_ATTEMPTS` | 5 | Max verification retries |
 | `CONFIDENCE_THRESHOLD` | 0.8 | Minimum confidence to pass |
+| `REQUIRE_API_KEY` | false | Enable API key authentication |
+| `RAG_API_KEY` | - | API key for authentication (when enabled) |
 
 ## Security Notes
 
