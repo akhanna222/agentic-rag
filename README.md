@@ -2,15 +2,132 @@
 
 A multi-disease RAG (Retrieval-Augmented Generation) system with agentic verification for zero-hallucination medical information retrieval.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green.svg)](https://fastapi.tiangolo.com/)
+
 ## Features
 
 - **Multi-format Document Support**: PDF, JSON, images (PNG, JPG), Markdown, and text files
 - **OpenAI Vision Processing**: Extracts text from images and scanned PDFs using GPT-4 Vision
 - **Per-Disease Collections**: Each disease has its own isolated vector database
-- **Agentic Verification**: Multi-step verification loop using reasoning models to ensure accuracy
+- **Agentic Verification**: Multi-step verification loop (up to 5 retries) using reasoning models
 - **Zero-Hallucination Design**: Strict context-based answering with source citations
+- **n8n Integration**: Simple REST API designed for workflow automation
 - **Simple Upload UI**: Web interface for managing diseases and uploading documents
-- **RESTful API**: Full API access for integration with other systems
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Setup Guide](docs/SETUP.md) | Complete installation instructions |
+| [API Reference](docs/API.md) | Full API documentation |
+| [Roadmap](docs/ROADMAP.md) | Future features and plans |
+
+---
+
+## Quick Start (5 minutes)
+
+### Option 1: Docker (Recommended)
+
+```bash
+# Clone repository
+git clone https://github.com/akhanna222/agentic-rag.git
+cd agentic-rag
+
+# Configure
+cp .env.example .env
+echo "OPENAI_API_KEY=sk-your-key-here" >> .env
+
+# Run
+docker-compose up -d
+
+# Access
+open http://localhost:8000
+```
+
+### Option 2: Local Development
+
+```bash
+# Clone and setup
+git clone https://github.com/akhanna222/agentic-rag.git
+cd agentic-rag
+
+# Configure
+cp .env.example .env
+# Edit .env and add OPENAI_API_KEY
+
+# Run
+chmod +x scripts/run-local.sh
+./scripts/run-local.sh
+```
+
+### Option 3: EC2 Deployment
+
+```bash
+# On your EC2 instance (Ubuntu)
+git clone https://github.com/akhanna222/agentic-rag.git
+cd agentic-rag
+chmod +x scripts/setup-ec2.sh
+./scripts/setup-ec2.sh
+
+# Configure and start
+nano /opt/agentic-rag/.env  # Add OPENAI_API_KEY
+cd /opt/agentic-rag && docker-compose up -d
+```
+
+---
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         User Query                                   │
+│                    "What are the symptoms?"                         │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    1. RETRIEVAL                                      │
+│   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐            │
+│   │  Diabetes   │    │ Hypertension│    │   Asthma    │            │
+│   │  VectorDB   │    │  VectorDB   │    │  VectorDB   │            │
+│   └──────┬──────┘    └─────────────┘    └─────────────┘            │
+│          │                                                          │
+│          ▼ Top-K relevant chunks                                    │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    2. GENERATION                                     │
+│                                                                      │
+│   Context + Query → GPT-4o → Answer with [Source] citations         │
+│                                                                      │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    3. VERIFICATION (Agentic Loop)                    │
+│                                                                      │
+│   ┌──────────────────────────────────────────────────────────┐      │
+│   │  o1-mini Reasoning Model checks:                         │      │
+│   │  • Is every claim supported by context?                  │      │
+│   │  • Are there any hallucinations?                         │      │
+│   │  • Confidence score 0.0 - 1.0                            │      │
+│   └──────────────────────────┬───────────────────────────────┘      │
+│                              │                                       │
+│              ┌───────────────┴───────────────┐                      │
+│              │                               │                      │
+│         Confidence ≥ 0.8              Confidence < 0.8              │
+│              │                               │                      │
+│              ▼                               ▼                      │
+│         ✅ Return                    Refine query & retry           │
+│         Answer                       (up to 5 attempts)             │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## Architecture
 
@@ -28,6 +145,10 @@ agentic-rag/
 │   ├── index.html           # Main UI
 │   ├── styles.css           # Styling
 │   └── app.js               # Frontend logic
+├── docs/
+│   ├── SETUP.md             # Complete setup guide
+│   ├── API.md               # API reference
+│   └── ROADMAP.md           # Future plans
 ├── scripts/
 │   ├── setup-ec2.sh         # EC2 Ubuntu setup script
 │   └── run-local.sh         # Local development script
@@ -36,68 +157,7 @@ agentic-rag/
 └── nginx.conf               # Production nginx config
 ```
 
-## Quick Start
-
-### Local Development
-
-1. Clone the repository:
-   ```bash
-   git clone <repo-url>
-   cd agentic-rag
-   ```
-
-2. Create environment file:
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your OPENAI_API_KEY
-   ```
-
-3. Run locally:
-   ```bash
-   chmod +x scripts/run-local.sh
-   ./scripts/run-local.sh
-   ```
-
-4. Access at `http://localhost:8000`
-
-### Docker Deployment
-
-1. Build and run:
-   ```bash
-   docker-compose up -d
-   ```
-
-2. For production with Nginx:
-   ```bash
-   docker-compose --profile production up -d
-   ```
-
-### EC2 Deployment
-
-1. SSH into your EC2 instance (Ubuntu)
-
-2. Clone the repository:
-   ```bash
-   git clone <repo-url>
-   cd agentic-rag
-   ```
-
-3. Run setup script:
-   ```bash
-   chmod +x scripts/setup-ec2.sh
-   ./scripts/setup-ec2.sh
-   ```
-
-4. Configure API key:
-   ```bash
-   nano /opt/agentic-rag/.env
-   ```
-
-5. Start the service:
-   ```bash
-   cd /opt/agentic-rag
-   docker-compose up -d
-   ```
+---
 
 ## n8n Integration
 
@@ -124,17 +184,21 @@ This API is designed for easy integration with n8n workflow automation.
 | `/api/v1/ask/async` | POST | Async query with webhook callback |
 | `/api/v1/diseases` | GET | List diseases (for dropdowns) |
 | `/api/v1/diseases?name=X` | POST | Create disease |
+| `/upload/{disease}/url` | POST | Upload document from URL |
 
 ### Example: Simple Query (GET)
 
 **HTTP Request Node Configuration:**
-- Method: `GET`
-- URL: `http://your-server:8000/api/v1/ask`
-- Authentication: Header Auth
-- Query Parameters:
-  - `disease`: `diabetes`
-  - `question`: `What are the symptoms?`
-  - `verify`: `true`
+```
+Method: GET
+URL: http://your-server:8000/api/v1/ask
+Query Parameters:
+  - disease: diabetes
+  - question: What are the symptoms?
+  - verify: true
+Headers:
+  - X-API-Key: your-api-key
+```
 
 **Response:**
 ```json
@@ -147,138 +211,134 @@ This API is designed for easy integration with n8n workflow automation.
 }
 ```
 
-### Example: Simple Query (POST)
+### Example: Async Query with Webhook
 
-**HTTP Request Node Configuration:**
-- Method: `POST`
-- URL: `http://your-server:8000/api/v1/ask`
-- Body Content Type: `JSON`
-- Body:
+For long-running queries:
+
 ```json
+POST /api/v1/ask/async
 {
   "disease": "diabetes",
-  "question": "What are the treatment options?",
-  "verify": true
+  "query": "Complex question here...",
+  "use_verification": true,
+  "webhook_url": "{{ $node.Webhook.webhookUrl }}"
 }
 ```
 
-### Example: Async Query with Webhook
+See [API Documentation](docs/API.md) for complete n8n integration examples.
 
-For long-running queries, use async mode with a webhook callback:
-
-1. Add a **Webhook** node to receive the callback
-2. Add an **HTTP Request** node:
-   - Method: `POST`
-   - URL: `http://your-server:8000/api/v1/ask/async`
-   - Body:
-   ```json
-   {
-     "disease": "diabetes",
-     "query": "Complex question here...",
-     "use_verification": true,
-     "webhook_url": "{{ $node.Webhook.webhookUrl }}"
-   }
-   ```
-
-### Example: Upload Document from URL
-
-Fetch and process a document from a URL:
-- Method: `POST`
-- URL: `http://your-server:8000/upload/diabetes/url`
-- Query Parameters:
-  - `url`: `https://example.com/document.pdf`
-
-### Example n8n Workflow
-
-```
-[Trigger] → [HTTP Request: List Diseases] → [Set Disease] → [HTTP Request: Ask Question] → [Response]
-```
+---
 
 ## API Reference
 
-### Diseases
+### Quick Reference
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/diseases` | GET | List all disease collections |
-| `/diseases` | POST | Create a new disease collection |
-| `/diseases/{name}` | DELETE | Delete a disease collection |
-| `/diseases/{name}/documents` | GET | List documents in a disease |
+| `/health` | GET | Health check |
+| `/diseases` | GET | List all diseases |
+| `/diseases` | POST | Create a disease |
+| `/diseases/{name}` | DELETE | Delete a disease |
+| `/upload/{disease}` | POST | Upload document |
+| `/query` | POST | Query with verification |
+| `/api/v1/ask` | GET/POST | Simple query (n8n) |
 
-### Documents
+### Query Example
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/upload/{disease}` | POST | Upload document to a disease |
-| `/documents/{disease}/{id}` | DELETE | Delete a document |
-
-### Query
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/query` | POST | Query with agentic verification |
-
-**Request Body:**
-```json
-{
-  "disease": "diabetes",
-  "query": "What are the symptoms?",
-  "use_verification": true,
-  "max_attempts": 5
-}
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "disease": "diabetes",
+    "query": "What are the symptoms?",
+    "use_verification": true
+  }'
 ```
 
 **Response:**
 ```json
 {
-  "answer": "According to the documents...",
+  "success": true,
+  "answer": "According to the documents, symptoms include...",
   "verified": true,
   "confidence": 0.92,
-  "references": [...],
-  "attempts": [...],
-  "disease": "diabetes"
+  "references": [
+    {
+      "source_id": 1,
+      "filename": "diabetes-guide.pdf",
+      "excerpt": "Common symptoms include..."
+    }
+  ]
 }
 ```
 
-## How Agentic Verification Works
+See [Full API Documentation](docs/API.md) for complete reference.
 
-1. **Initial Query**: User submits a question for a specific disease
-2. **Retrieval**: Relevant chunks are retrieved from the disease's vector store
-3. **Generation**: Answer is generated strictly from retrieved context
-4. **Verification**: A reasoning model (o1-mini) verifies the answer against context
-5. **Iteration**: If confidence < threshold, query is refined and steps 2-4 repeat
-6. **Result**: Returns best answer after up to N attempts with confidence score
-
-This multi-step verification ensures:
-- All claims are supported by source documents
-- No hallucinations or external knowledge
-- Clear source citations
-- Confidence transparency
+---
 
 ## Configuration
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OPENAI_API_KEY` | Required | Your OpenAI API key |
+| `REQUIRE_API_KEY` | false | Enable API authentication |
+| `RAG_API_KEY` | - | API key for authentication |
 | `VISION_MODEL` | gpt-4o | Model for document parsing |
-| `EMBEDDING_MODEL` | text-embedding-3-small | Model for embeddings |
-| `REASONING_MODEL` | o1-mini | Model for verification |
-| `GENERATION_MODEL` | gpt-4o | Model for answer generation |
-| `CHUNK_SIZE` | 1000 | Characters per chunk |
-| `CHUNK_OVERLAP` | 200 | Overlap between chunks |
-| `TOP_K_RETRIEVAL` | 5 | Number of chunks to retrieve |
+| `EMBEDDING_MODEL` | text-embedding-3-small | Embedding model |
+| `REASONING_MODEL` | o1-mini | Verification model |
+| `GENERATION_MODEL` | gpt-4o | Answer generation model |
 | `MAX_VERIFICATION_ATTEMPTS` | 5 | Max verification retries |
-| `CONFIDENCE_THRESHOLD` | 0.8 | Minimum confidence to pass |
-| `REQUIRE_API_KEY` | false | Enable API key authentication |
-| `RAG_API_KEY` | - | API key for authentication (when enabled) |
+| `CONFIDENCE_THRESHOLD` | 0.8 | Minimum confidence score |
+
+See [Setup Guide](docs/SETUP.md) for complete configuration options.
+
+---
+
+## Roadmap
+
+### Coming Soon (v1.1 - v1.3)
+- Enhanced document processing (OCR improvements, table extraction)
+- Hybrid search (semantic + keyword)
+- Chat interface with conversation history
+- Admin dashboard with analytics
+
+### Future (v2.0+)
+- Multi-tenant architecture
+- Knowledge graph integration
+- HIPAA compliance features
+- Fine-tuned medical models
+
+See [Full Roadmap](docs/ROADMAP.md) for detailed plans.
+
+---
 
 ## Security Notes
 
 - Store API keys in environment variables, not in code
 - Use HTTPS in production (configure nginx with SSL)
-- Consider rate limiting for production deployments
+- Enable `REQUIRE_API_KEY=true` for production
 - Review uploaded documents for sensitive information
+- Consider rate limiting for production deployments
+
+---
+
+## Contributing
+
+Contributions are welcome! Please see our [Roadmap](docs/ROADMAP.md) for areas where help is needed.
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a Pull Request
+
+---
 
 ## License
 
-MIT License
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/akhanna222/agentic-rag/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/akhanna222/agentic-rag/discussions)
