@@ -53,7 +53,7 @@ echo "OPENAI_API_KEY=sk-your-key-here" >> .env
 docker-compose up -d
 
 # 5. Access the application
-open http://localhost:8000
+open http://localhost:8001
 ```
 
 ---
@@ -137,9 +137,9 @@ python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ### Step 7: Access the Application
 
-- **Web UI**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
+- **Web UI**: http://localhost:8001
+- **API Docs**: http://localhost:8001/docs
+- **Health Check**: http://localhost:8001/health
 
 ---
 
@@ -340,7 +340,7 @@ openssl rand -base64 32
 ### Check Health
 
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 ```
 
 Expected response:
@@ -356,17 +356,17 @@ Expected response:
 
 ```bash
 # Create a disease
-curl -X POST "http://localhost:8000/api/v1/diseases?name=test-disease"
+curl -X POST "http://localhost:8001/api/v1/diseases?name=test-disease"
 
 # List diseases
-curl http://localhost:8000/api/v1/diseases
+curl http://localhost:8001/api/v1/diseases
 
 # Upload a document (example with a text file)
 echo "Diabetes symptoms include increased thirst and frequent urination." > test.txt
-curl -X POST -F "file=@test.txt" http://localhost:8000/upload/test-disease
+curl -X POST -F "file=@test.txt" http://localhost:8001/upload/test-disease
 
 # Query
-curl "http://localhost:8000/api/v1/ask?disease=test-disease&question=What%20are%20symptoms?&verify=false"
+curl "http://localhost:8001/api/v1/ask?disease=test-disease&question=What%20are%20symptoms?&verify=false"
 ```
 
 ---

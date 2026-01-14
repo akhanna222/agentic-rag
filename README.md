@@ -43,7 +43,7 @@ echo "OPENAI_API_KEY=sk-your-key-here" >> .env
 docker-compose up -d
 
 # Access
-open http://localhost:8000
+open http://localhost:8001
 ```
 
 ### Option 2: Local Development
@@ -191,7 +191,7 @@ This API is designed for easy integration with n8n workflow automation.
 **HTTP Request Node Configuration:**
 ```
 Method: GET
-URL: http://your-server:8000/api/v1/ask
+URL: http://your-server:8001/api/v1/ask
 Query Parameters:
   - disease: diabetes
   - question: What are the symptoms?
@@ -246,7 +246,7 @@ See [API Documentation](docs/API.md) for complete n8n integration examples.
 ### Query Example
 
 ```bash
-curl -X POST http://localhost:8000/query \
+curl -X POST http://localhost:8001/query \
   -H "Content-Type: application/json" \
   -d '{
     "disease": "diabetes",

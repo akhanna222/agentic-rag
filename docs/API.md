@@ -2,9 +2,9 @@
 
 Complete API documentation for the Agentic RAG system.
 
-**Base URL**: `http://your-server:8000`
+**Base URL**: `http://your-server:8001`
 
-**Interactive Docs**: `http://your-server:8000/docs` (Swagger UI)
+**Interactive Docs**: `http://your-server:8001/docs` (Swagger UI)
 
 ---
 
@@ -19,7 +19,7 @@ X-API-Key: your-api-key-here
 
 ### Example with cURL
 ```bash
-curl -H "X-API-Key: your-api-key" http://localhost:8000/api/v1/diseases
+curl -H "X-API-Key: your-api-key" http://localhost:8001/api/v1/diseases
 ```
 
 ---
@@ -85,7 +85,7 @@ GET /api/v1/ask?disease={disease}&question={question}&verify={bool}
 
 **Example**
 ```bash
-curl "http://localhost:8000/api/v1/ask?disease=diabetes&question=What%20are%20symptoms?&verify=true"
+curl "http://localhost:8001/api/v1/ask?disease=diabetes&question=What%20are%20symptoms?&verify=true"
 ```
 
 **Response**
@@ -336,7 +336,7 @@ Content-Type: multipart/form-data
 curl -X POST \
   -H "X-API-Key: your-key" \
   -F "file=@document.pdf" \
-  http://localhost:8000/upload/diabetes
+  http://localhost:8001/upload/diabetes
 ```
 
 **Response**
@@ -368,7 +368,7 @@ POST /upload/{disease_name}/url?url={document_url}&filename={optional_name}
 **Example**
 ```bash
 curl -X POST \
-  "http://localhost:8000/upload/diabetes/url?url=https://example.com/guide.pdf"
+  "http://localhost:8001/upload/diabetes/url?url=https://example.com/guide.pdf"
 ```
 
 **Response**
@@ -573,7 +573,7 @@ class AgenticRAG:
         return response.json()
 
 # Usage
-rag = AgenticRAG("http://localhost:8000", api_key="your-key")
+rag = AgenticRAG("http://localhost:8001", api_key="your-key")
 result = rag.ask("diabetes", "What are the symptoms?")
 print(result["answer"])
 ```
@@ -602,7 +602,7 @@ class AgenticRAG {
 }
 
 // Usage
-const rag = new AgenticRAG('http://localhost:8000', 'your-key');
+const rag = new AgenticRAG('http://localhost:8001', 'your-key');
 const result = await rag.ask('diabetes', 'What are the symptoms?');
 console.log(result.answer);
 ```
