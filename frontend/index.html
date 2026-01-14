@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic RAG - Medical Document Intelligence</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Agentic RAG</h1>
+            <p class="subtitle">Medical Document Intelligence with Zero-Hallucination Verification</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar: Disease Management -->
+            <aside class="sidebar">
+                <div class="panel">
+                    <h2>Disease Collections</h2>
+
+                    <!-- Create Disease -->
+                    <div class="create-disease">
+                        <input type="text" id="newDiseaseName" placeholder="New disease name...">
+                        <button onclick="createDisease()" class="btn btn-primary">Create</button>
+                    </div>
+
+                    <!-- Disease List -->
+                    <div id="diseaseList" class="disease-list">
+                        <p class="loading">Loading diseases...</p>
+                    </div>
+                </div>
+
+                <!-- Upload Panel -->
+                <div class="panel" id="uploadPanel" style="display: none;">
+                    <h2>Upload Documents</h2>
+                    <p class="selected-disease">Selected: <span id="selectedDiseaseName"></span></p>
+
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📄</div>
+                        <p>Drag & drop files here or click to browse</p>
+                        <p class="file-types">PDF, JSON, PNG, JPG, MD, TXT</p>
+                        <input type="file" id="fileInput" multiple accept=".pdf,.json,.png,.jpg,.jpeg,.gif,.md,.txt" onchange="handleFileSelect(event)">
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div id="uploadProgress" class="upload-progress"></div>
+
+                    <!-- Document List -->
+                    <h3>Uploaded Documents</h3>
+                    <div id="documentList" class="document-list">
+                        <p class="empty">No documents uploaded</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Query Panel -->
+            <section class="query-section">
+                <div class="panel">
+                    <h2>Query RAG System</h2>
+
+                    <!-- Disease Selector -->
+                    <div class="form-group">
+                        <label for="queryDisease">Select Disease:</label>
+                        <select id="queryDisease" onchange="onQueryDiseaseChange()">
+                            <option value="">-- Select a disease --</option>
+                        </select>
+                    </div>
+
+                    <!-- Query Input -->
+                    <div class="form-group">
+                        <label for="queryInput">Your Question:</label>
+                        <textarea id="queryInput" rows="3" placeholder="Ask a question about the disease..."></textarea>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="options-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="useVerification" checked>
+                            Enable Agentic Verification (recommended)
+                        </label>
+                        <div class="attempts-input">
+                            <label for="maxAttempts">Max attempts:</label>
+                            <input type="number" id="maxAttempts" value="5" min="1" max="10">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button onclick="submitQuery()" class="btn btn-primary btn-large" id="queryBtn">
+                        Ask Question
+                    </button>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="panel results-panel" id="resultsPanel" style="display: none;">
+                    <div class="results-header">
+                        <h2>Answer</h2>
+                        <div class="verification-badge" id="verificationBadge"></div>
+                    </div>
+
+                    <!-- Answer -->
+                    <div class="answer-content" id="answerContent"></div>
+
+                    <!-- Confidence -->
+                    <div class="confidence-bar" id="confidenceBar">
+                        <div class="confidence-label">Confidence: <span id="confidenceValue">0%</span></div>
+                        <div class="confidence-track">
+                            <div class="confidence-fill" id="confidenceFill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Warning -->
+                    <div class="warning-box" id="warningBox" style="display: none;"></div>
+
+                    <!-- References -->
+                    <div class="references-section" id="referencesSection">
+                        <h3>References</h3>
+                        <div id="referencesList"></div>
+                    </div>
+
+                    <!-- Verification Attempts -->
+                    <details class="attempts-details" id="attemptsDetails">
+                        <summary>Verification Details (<span id="attemptCount">0</span> attempts)</summary>
+                        <div id="attemptsList"></div>
+                    </details>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Agentic RAG System v1.0 | Zero-Hallucination Medical Intelligence</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
